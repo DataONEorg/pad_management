@@ -15,7 +15,7 @@ Index entries are structured like:
 | description         | Description if provided otherwise slug of first 100 words of text |
 | format              | html, text, markdown |
 | identifier          | url |
-| publisher           | DataONE |
+| publisher           | Origin of content: epad, hackpad, archive |
 | source              | url |
 | title               | document title if available |
 | keywords            | keywords if available |
