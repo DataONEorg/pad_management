@@ -1,0 +1,99 @@
+body {
+    font-family: "Open Sans", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 0.9rem;
+}
+
+.header-nav {
+    align: left;
+    text-align: left;
+}
+
+tr.hl_row {
+    font-size: smaller;
+    color: #888888;
+    padding-bottom: 10px;
+}
+
+.odd {
+}
+
+.even {
+}
+
+tr.hl_row > td {
+    padding-bottom: 0.5em;
+}
+
+em {
+    background: hsl(0, 100%, 95%);
+}
+
+.footer-details {
+    text-align: left;
+    font-size: smaller;
+}
+
+table.hover_table {
+    margin-top: 20px;
+}
+
+tr.hover_table:hover .child {
+    color: darkred;
+}
+
+tr.hover_table {
+    border-top: 1px solid #E1E1E1;
+    border-bottom: 1px solid #E1E1E1;
+}
+
+td.hover_table {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 3px;
+    padding-right: 3px;
+}
+
+label[for=help-toggle] {
+    cursor: pointer;
+    font-size: 1rem;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+}
+
+#help-toggle {
+  display: none;
+}
+
+#help-toggle:not(:checked) ~ #help-item {
+  display: none;
+  transition: opacity 1.5s linear, max-height 1.5s linear;s
+}
+
+#help-item {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.info > ul {
+    padding-left: 1rem;
+    column-count: 2;
+}
+
+.info > ul li {
+    list-style-type: none;
+}
+
+.info > li code {
+    font-size: 1rem;
+    background-color: #E1E1E1;
+}
+
+span.info {
+    color: #888888;
+    font-size: smaller;
+}
+
+input {
+    font-size: 1rem;
+}

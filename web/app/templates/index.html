@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Notes</title>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,300,600" rel="stylesheet" type="text/css">
+    <link href="/static/template.css" rel="stylesheet" />
+    <link href="/static/app.css" rel="stylesheet" />
+    <script src="/static/modernizr-custom.min.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+    document.onkeypress = function (e) {
+      e = e || window.event;
+      // use e.keyCode
+    };
+    </script>
+  </head>
+  <body>
+    <div class="main-info">
+
+    <div class="row">
+      <!-- Header -->
+      <header>
+        <h1><a class="nav-header" href="https://www.dataone.org/" title="DataONE">
+          <img src="/static/images/dataone-logo-color-small.jpg" height="30px" /></a>
+          &nbsp;&nbsp;Notes</h1>
+      </header>
+    </div>
+
+      <div class="row">
+          <form>
+            <input type="text" id="inp_qbody" name="qb" value="{{qbody}}" size="80"></input>
+            <label for="help-toggle">?</label><input id="help-toggle" type="checkbox" />
+            <input type="submit" style="position: absolute; left: -9999px"/>
+<!--
+            <input type="checkbox" name="p" value="ep" />
+            <input type="checkbox" name="p" value="ea" />
+            <input type="checkbox" name="p" value="hp" />
+-->
+      <div id="help-item" class="info">
+        <span>Search contents of etherpads.</span>
+        <ul class="info">
+          <li><code>+</code> signifies AND operation</li>
+          <li><code>|</code> signifies OR operation</li>
+          <li><code>-</code> negates a single token</li>
+          <li><code>&quot;</code> wraps a number of tokens to signify a phrase for searching</li>
+          <li><code>*</code> at the end of a term signifies a prefix query</li>
+          <li><code>(</code> and <code>)</code> signify precedence</li>
+          <li><code>~N</code> after a word signifies edit distance (fuzziness)</li>
+          <li><code>~N</code> after a phrase signifies slop amount</li>
+          <li>To search for any of these special characters, escape with <code>\</code></li>
+        </ul>
+      </div>
+
+          </form>
+      </div>
+      <div class="row" style="font-size: smaller">
+          {% if qbody|length > 0 %}
+          {{nhits}} documents match
+          {% else %}
+          {{nhits}} documents available
+          {% endif %}
+      </div>
+
+
+      <div class="row">
+      {% if nhits > 0 %}
+      <table id="resultsTable" class="hover_table tablesorter">
+        <thead>
+        <tr>
+          <th><div style="width:3em">Type</div></th>
+          <th><div style="width:6em">Modified</div></th>
+          <th>Name</th>
+          <th></th>
+        </tr>
+        </thead>
+        <tbody class="hover_table">
+        {% for row in rows %}
+        <tr class="hover_table">
+          <td valign="top">{{ row.publisher | logoify | safe }}</td>
+          <td valign="top">{{ row.date_modified | formatDateStr }}</td>
+          <td valign="top"><a href="{{row.source}}">{{ row.title }}</a>
+            {% if row.meta.highlight is defined %}
+            <br /><span class="info">{{ row.lines }} lines</span>
+            {% else %}
+            <span class="info" style="float:right; padding-right:1em">{{ row.lines }} lines</span>
+            {% endif %}</td>
+          <td>
+            <table class="hl_row">
+            {% if row.meta.highlight is defined %}
+              {% for hilight in row.meta.highlight.body %}
+              <tr class="hl_row {{ loop.cycle('odd','even') }}"><td class="hl_row">{{ hilight | sanitize | safe }} ⏎</td></tr>
+              {% endfor %}
+            {% endif %}
+              <tr class="hl_row"><td class="hl_row">[ {{ row.contributor | unique | join(", ")}}] </td></tr>
+            </table>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-details">
+            <p class="footer-details">DataONE is a collaboration among many partner organizations, and is funded by the
+              US National Science Foundation (NSF) under a Cooperative Agreement. </p>
+            <p class="footer-details">Acknowledgement: This material is based upon work supported by the National
+              Science Foundation under Grant Numbers 0830944 and 1430508. </p>
+            <p class="footer-details">Disclaimer: Any opinions, findings, and conclusions or recommendations expressed
+              in this material are those of the author(s) and do not necessarily reflect the views of the National
+              Science Foundation.</p>
+        </div>
+    </footer>
+  </body>
+</html>
