@@ -1,6 +1,6 @@
 # Indexing Etherpad Documents
 
-This tool runs on the etherpad server and populates an elasticsearch index with pad contents and associated metadata.
+This tool runs on the etherpad server and populates an [elasticsearch](https://www.elastic.co/products/elasticsearch) index with pad contents and associated metadata.
 
 Index entries are structured like:
 
@@ -17,7 +17,7 @@ Index entries are structured like:
 | identifier          | url |
 | publisher           | Origin of content: epad, hackpad, archive |
 | source              | url |
-| title               | document title if available |
+| title               | Document title if available |
 | keywords            | keywords if available |
 | body                | Document text |
 
