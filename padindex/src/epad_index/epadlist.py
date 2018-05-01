@@ -1,71 +1,51 @@
-'''
-Created on Sep 17, 2014
-
-@author: vieglais
-'''
 
 import logging
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import requests
 from datetime import datetime
+from . import doclist
 
-class PadList(object):
+class PadList(doclist.DocList):
   def __init__(self, host="https://epad.dataone.org/pad/api/1.2.1/",
                apikey=None,
-               indexer_url="http://localhost:9200/notes/note/",
                db_name='etherpad',
                db_user='etherpad',
-               db_password=None):
-    self.log = logging.getLogger(self.__class__.__name__)
-    self.params = {'apikey': apikey}
+               db_password=None,
+               tagger=None):
+    super().__init__(tagger=tagger)
+    self._indexer_id_prefix = "EP:"
+    self.params['apikey'] = apikey
     self.url = host
     self.pad_base_url = "https://epad.dataone.org/pad/p/"
-    self.indexer_url=indexer_url
-    self.db_name=db_name
-    self.db_user=db_user
-    self.db_password=db_password
-    self.authors = {}
+    self.db_name = db_name
+    self.db_user = db_user
+    self.db_password = db_password
 
 
-  def pads(self):
+  def getDocumentIDs(self):
     res = requests.get(self.url + "listAllPads", params=self.params).json()
     return res['data']['padIDs']
 
 
-  def padUrl(self, padId):
-    url = self.pad_base_url + urllib.quote(padId,'')
+  def padUrl(self, pad_id):
+    url = self.pad_base_url + urllib.parse.quote(pad_id, '')
     return url
 
 
-  def getPadIdentifier(self, padId):
-    return "EP:"+padId
-
-
-  def getPadLastIndexDate(self, padId):
-    doc_id = self.getPadIdentifier(padId)
-    url = "{0}{1}?_source_include=date_index_updated".format(self.indexer_url, urllib.quote(doc_id))
-    logging.debug(url)
-    res = requests.get(url).json()
-    if res['found']:
-      dstr = res['_source']['date_index_updated'].split('.')[0]
-      return datetime.strptime(dstr, '%Y-%m-%dT%H:%M:%S')
-    return datetime.strptime("1970-01-01T00:00:01", '%Y-%m-%dT%H:%M:%S')
-
-
-  def getAuthorName(self, authorId):
-    if self.authors.has_key(authorId):
-      return self.authors[authorId]
+  def getAuthorName(self, author_id):
+    if author_id in self.authors:
+      return self.authors[author_id]
     params = self.params
-    params['authorID'] = authorId
+    params['authorID'] = author_id
     res = requests.get(self.url + 'getAuthorName', params=params).json()
     author = res['data']
-    self.authors[authorId] = author
+    self.authors[author_id] = author
     return author
 
 
-  def padAuthors(self, padId):
+  def padAuthors(self, pad_id):
     params = self.params
-    params['padID'] = padId
+    params['padID'] = pad_id
     res = requests.get(self.url + 'listAuthorsOfPad', params=params).json()
     anames = []
     for author in res['data']['authorIDs']:
@@ -75,12 +55,12 @@ class PadList(object):
     return anames
 
 
-  def padLastEdited(self, padId):
-    '''Returns a python datetime object indicating the last time the pad was 
+  def padLastEdited(self, pad_id):
+    '''Returns a python datetime object indicating the last time the pad was
     edited
     '''
     params = self.params
-    params['padID'] = padId
+    params['padID'] = pad_id
     res = requests.get(self.url + 'getLastEdited', params=params).json()
     tmod = datetime.fromtimestamp(res['data']['lastEdited'] / 1000.0)
     return tmod
@@ -89,13 +69,13 @@ class PadList(object):
   def padCreated(self, padId):
     '''
     Date created can be retrieved from the database by getting revision 0 of the PADID
-    
+
       select store.value from store where store.key='pad:PADID:revs:0';
-      
+
     Returns a json object with a field "timestamp" which is the timestamp of revision 0 of the pad.
-    
-    :param padId: 
-    :return: 
+
+    :param padId:
+    :return:
     '''
     return None
 
@@ -115,21 +95,38 @@ class PadList(object):
     return res
 
 
-  def getIndexEntry(self, padId):
+  def getIndexEntry(self, pad_id):
     '''
-    Returns an index entry dict 
-    :param padId: 
-    :return: 
+    Returns an index entry dict
+
+    Dict of:
+      {'identifier': '',       #unique id for document
+       'title': '',            #title of document
+       'contributor': [],      #list of authors of document
+       'creator': '',          #the creator, usually the first author
+       'description': '',      #description, using the first 500 chars of document
+       'date_created': None,   #datetime that document was created
+       'date_modified': None,  #datetime the document was modified
+       'date_index_updated': datetime.utcnow(),
+       'format': 'text/plain',
+       'source': '',           #URL of source document, the pad URL
+       'body': '',             #Text of the document
+       'publisher': '',        #
+       'keywords': []
+      }
+
+    :param padId:
+    :return:
     '''
     res = {}
-    authors = self.padAuthors(padId)
-    ptext = self.padText(padId)
-    pad_url = self.padUrl(padId)
-    d_created = self.padCreated(padId)
-    d_modified = self.padLastEdited(padId)
+    authors = self.padAuthors(pad_id)
+    ptext = self.padText(pad_id)
+    pad_url = self.padUrl(pad_id)
+    d_created = self.padCreated(pad_id)
+    d_modified = self.padLastEdited(pad_id)
     tnow = datetime.utcnow()
-    res['identifier'] = self.getPadIdentifier(padId)
-    res['title'] = padId
+    res['identifier'] = self.getIndexedId(pad_id)
+    res['title'] = pad_id
     res['contributor'] = authors
     if len(authors) > 0:
       res['creator'] = authors[0]
@@ -141,22 +138,24 @@ class PadList(object):
     res['date_index_updated'] = tnow
     res['format'] = 'text/plain'
     res['source'] = pad_url
-    res['title'] = padId
     res['body'] = ptext
     res['publisher'] = 'epad'
+    if self.tagger is not None:
+      key_words = self.tagger(ptext, self.max_key_words)
+      kwl = []
+      for kw in key_words:
+        kwl.append(kw.string)
+      res['keywords'] = kwl
     return res
-
 
 
 if __name__ == "__main__":
   k = "api key"
   PL = PadList(apikey=k)
-  pads = PL.pads()
+  pads = PL.getDocumentIDs()
   for pad in pads:
-    print pad
-    #print PL.getPadInfo(pad)
+    print((str(pad)))
+    # print PL.getPadInfo(pad)
     # authors = PL.padAuthors(pad)
     # for author in authors:
     #  print PL.getAuthorName(author)
-
-

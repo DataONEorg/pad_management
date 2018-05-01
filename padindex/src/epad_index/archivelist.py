@@ -17,11 +17,16 @@ class ArchiveList(object):
   '''
   
   '''
-  def __init__(self, archive_url="https://epad.dataone.org/archive/content/", fakes=False):
+  def __init__(self, 
+               archive_url="https://epad.dataone.org/archive/content/",
+               fakes=False,
+               tagger=None):
     self._L = logging.getLogger(self.__class__.__name__)
     self.archive_url = archive_url
     self.pad_info = []
     self.fakes = fakes
+    self.tagger = tagger
+    self.max_key_words = 10
     self.loadDocuments()
 
 
@@ -122,6 +127,12 @@ datetime(year, month, day[, hour[, minute[, second[, microsecond[, tzinfo]]]]])
       doc = codecs.open(fname, 'r', encoding='utf-8').read()
     e['body'] = doc
     e['description'] = doc[:500]
+    if self.tagger is not None:
+      key_words = self.tagger(doc, self.max_key_words)
+      kwl = []
+      for kw in key_words:
+        kwl.append( kw.string )
+      e['keywords'] = kwl
     return e
 
 
@@ -137,6 +148,6 @@ if __name__ == "__main__":
   archive_url = "/Users/vieglais/Projects/DataONE_61385/svn/documents/Projects/epads"
   archive = ArchiveList(archive_url = archive_url, fakes=True)
   for pad in archive.pads():
-    print archive.getEntry(pad)['publisher']
+    print(archive.getEntry(pad)['publisher'])
 
 
