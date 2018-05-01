@@ -27,33 +27,34 @@
       </header>
     </div>
 
+     <form>
       <div class="row">
-          <form>
             <input type="text" id="inp_qbody" name="qb" value="{{qbody}}" size="80"></input>
+            <input type="submit" value="Go" />
             <label for="help-toggle">?</label><input id="help-toggle" type="checkbox" />
-            <input type="submit" style="position: absolute; left: -9999px"/>
-<!--
-            <input type="checkbox" name="p" value="ep" />
-            <input type="checkbox" name="p" value="ea" />
-            <input type="checkbox" name="p" value="hp" />
--->
-      <div id="help-item" class="info">
-        <span>Search contents of etherpads.</span>
-        <ul class="info">
-          <li><code>+</code> signifies AND operation</li>
-          <li><code>|</code> signifies OR operation</li>
-          <li><code>-</code> negates a single token</li>
-          <li><code>&quot;</code> wraps a number of tokens to signify a phrase for searching</li>
-          <li><code>*</code> at the end of a term signifies a prefix query</li>
-          <li><code>(</code> and <code>)</code> signify precedence</li>
-          <li><code>~N</code> after a word signifies edit distance (fuzziness)</li>
-          <li><code>~N</code> after a phrase signifies slop amount</li>
-          <li>To search for any of these special characters, escape with <code>\</code></li>
-        </ul>
+        <div id="help-item" class="info">
+          <span>Search contents of etherpads.</span>
+          <ul class="info">
+            <li><code>+</code> signifies AND operation</li>
+            <li><code>|</code> signifies OR operation</li>
+            <li><code>-</code> negates a single token</li>
+            <li><code>&quot;</code> wraps a number of tokens to signify a phrase for searching</li>
+            <li><code>*</code> at the end of a term signifies a prefix query</li>
+            <li><code>(</code> and <code>)</code> signify precedence</li>
+            <li><code>~N</code> after a word signifies edit distance (fuzziness)</li>
+            <li><code>~N</code> after a phrase signifies slop amount</li>
+            <li>To search for any of these special characters, escape with <code>\</code></li>
+          </ul>
+        </div>
       </div>
-
-          </form>
-      </div>
+       <div class="row" style="font-size:smaller">
+         Include EPads: <input type="checkbox" name="p" value="ep" onclick="this.form.submit();" {% if epad_selected %}checked="1"{% endif %}/>
+         &nbsp;&nbsp;
+         Archived EPads: <input type="checkbox" name="p" value="ea" onclick="this.form.submit();" {% if arch_selected %}checked="1"{% endif %}/>
+         &nbsp;&nbsp;
+         HPad: <input type="checkbox" name="p" value="hp" onclick="this.form.submit();" {% if hpad_selected %}checked="1"{% endif %}/>
+       </div>
+     </form>
       <div class="row" style="font-size: smaller">
           {% if qbody|length > 0 %}
           {{nhits}} documents match
@@ -92,7 +93,7 @@
               <tr class="hl_row {{ loop.cycle('odd','even') }}"><td class="hl_row">{{ hilight | sanitize | safe }} ⏎</td></tr>
               {% endfor %}
             {% endif %}
-              <tr class="hl_row"><td class="hl_row">[ {{ row.contributor | unique | join(", ")}}] </td></tr>
+              <tr class="hl_row"><td class="hl_row">[ {{ row.contributor | unique | join(", ")}} ] </td></tr>
             </table>
           </td>
         </tr>

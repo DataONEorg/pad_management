@@ -8,7 +8,7 @@ import json
 LOGOS = {'epad':{'img':'<span title="Etherpad" class="logo_etherpad">EP</span>',
                      'short':'EP',
                      'descr':'Etherpad documents'},
-         'hackmd':{'img':'<span title="Hackpad" class="logo_hackpad">HP</span>',
+         'hpad':{'img':'<span title="Hackpad" class="logo_hackpad">HP</span>',
                    'short':'HP',
                    'descr':'Hackpad documents',
                    },
@@ -82,9 +82,9 @@ def source_listing_filter(selection):
 def padExists():
   '''
   Does specified name refer to existing etherpad, archive, or hackpad?
-  
+
   Check the index for ID
-  :return: 
+  :return:
   '''
   pass
 
@@ -153,11 +153,15 @@ def index():
   response = s.execute()
   nhits = response.hits.total
   max_score = response.hits.max_score
+  epad_selected = "epad" in qsources
+  hpad_selected = "hpad" in qsources
+  arch_selected = "archive_epad" in qsources
   return render_template('index.html',
                          nhits=nhits,
                          max_score=max_score,
                          rows=s[0:nhits],
                          qbody=qbody,
                          show_help=show_help,
-                         sources=qsources)
-
+                         epad_selected=epad_selected,
+                         hpad_selected=hpad_selected,
+                         arch_selected=arch_selected)
