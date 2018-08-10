@@ -99,7 +99,7 @@ def doIndexPads(pad_list,
     dt_modified = pad_list.padLastEdited(pad)
     if (dt_modified > dt_indexed) or reindex_all:
       pad_data = pad_list.getIndexEntry(pad)
-      if len(pad_data['body']) > len(EMPTY_CONTENT)+10:
+      if len(pad_data['body']) > len(EMPTY_CONTENT)+10 or pad.find("DUG") >= 0:
         logging.info("Indexing: %s", pad)
         epad_doc = Note(**pad_data)
         epad_doc.meta.id = pad_data['identifier']
@@ -157,6 +157,12 @@ if __name__ == "__main__":
   parser.add_argument('--config',
                       default=os.path.expanduser("~/.dataone/epads/epadindex.yaml"),
                       help="Path to configuration file")
+  parser.add_argument('-E', '--epad',
+                      action='store_true',
+                      help = "Etherpad scan and index.")
+  parser.add_argument('-H', '--hpad',
+                      action='store_true',
+                      help = "Hackpad scan and index.")
   args = parser.parse_args()
   # Setup logging verbosity
   levels = [logging.WARNING, logging.INFO, logging.DEBUG]
@@ -180,14 +186,17 @@ if __name__ == "__main__":
     connections.create_connection(hosts=['localhost'])
     logging.info("Creating document tagger...")
     doc_tagger = getTagger()
-    logging.info("Indexing etherpads...")
-    indexEtherpads(api_key = epad_api_key,
-                   indexer_url="http://localhost:9200/" + index_name + "/note/",
-                   reindex_all=False,
-                   doc_tagger=doc_tagger)
-    indexHPads(indexer_url="http://localhost:9200/" + index_name + "/note/",
-                   reindex_all=False,
-                   doc_tagger=doc_tagger)
+    if args.epad:
+      logging.info("Indexing etherpads...")
+      indexEtherpads(api_key = epad_api_key,
+                     indexer_url="http://localhost:9200/" + index_name + "/note/",
+                     reindex_all=False,
+                     doc_tagger=doc_tagger)
+    if args.hpad:
+      logging.info("Indexing hackpads...")
+      indexHPads(indexer_url="http://localhost:9200/" + index_name + "/note/",
+                 reindex_all=False,
+                 doc_tagger=doc_tagger)
 
   #indexArchivedEtherpads(doc_tagger=doc_tagger)
   #indexHPads(indexer_url="http://localhost:9200/" + INDEX + "/note/",

@@ -138,7 +138,7 @@ def index():
   if qbody == 'help':
     show_help = True
   s = Search(using=app.es_client, index=app.config['DOC_INDEX'])\
-      .source(include=['publisher', 'id', 'title', 'date_modified', 'lines', 'source', 'contributor'])
+      .source(include=['publisher', 'id', 'title', 'date_modified', 'lines', 'source', 'contributor', 'keywords'])
   if len(qsources) > 0:
     s = s.filter('terms', publisher=qsources)
 
